@@ -1,4 +1,4 @@
-package http
+package http_test
 
 import (
 	"bytes"
@@ -10,12 +10,61 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"os"
 	"testing"
 
+	api_http "github.com/arpsch/xm/api/http"
 	"github.com/arpsch/xm/model"
 	"github.com/arpsch/xm/store/mongo"
 	"github.com/pkg/errors"
 )
+
+var ah *api_http.ApiHandler
+var ds *mongo.MongoStore
+
+func testSetup() error {
+	var err error
+
+	mgoUrl, err := url.Parse("mongodb://localhost:27017")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	storeConfig := mongo.MongoStoreConfig{
+		MongoURL: mgoUrl,
+		DbName:   "xm",
+	}
+	ds, err = mongo.NewMongoStore(context.Background(), storeConfig)
+	if err != nil {
+		return err
+	}
+	ah = api_http.NewApiHandler(ds)
+
+	return nil
+}
+
+func testTeardown() error {
+	err := ds.DropDatabase(context.Background())
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func TestMain(m *testing.M) {
+	if err := testSetup(); err != nil {
+		os.Exit(-1)
+	}
+
+	exitCode := m.Run()
+
+	if err := testTeardown(); err != nil {
+		os.Exit(-1)
+	}
+
+	// Exit
+	os.Exit(exitCode)
+}
 
 func TestCreateCompany(t *testing.T) {
 
@@ -113,21 +162,7 @@ func TestCreateCompany(t *testing.T) {
 	for _, tc := range tt {
 
 		t.Run(tc.name, func(t *testing.T) {
-			mgoUrl, err := url.Parse("mongodb://localhost:27017")
-			if err != nil {
-				log.Fatal(err)
-			}
 
-			storeConfig := mongo.MongoStoreConfig{
-				MongoURL: mgoUrl,
-				DbName:   "xm",
-			}
-			ds, err := mongo.NewMongoStore(context.Background(), storeConfig)
-			if err != nil {
-				log.Fatal(err)
-			}
-
-			ah := NewApiHandler(ds)
 			rec := httptest.NewRecorder()
 			compJson, _ := json.Marshal(&tc.input)
 			req, err := http.NewRequest(
@@ -165,6 +200,7 @@ func TestCreateCompany(t *testing.T) {
 				t.Logf("error message: %s\n", b)
 				t.Errorf("expected status %v, received status %v", tc.statusCode, rec.Code)
 			}
+
 			if err := ds.DropDatabase(context.Background()); err != nil {
 				t.Errorf("database clean-up failed: %s\n", err)
 			}
@@ -311,21 +347,6 @@ func TestGetCompanies(t *testing.T) {
 	for _, tc := range tt {
 
 		t.Run(tc.name, func(t *testing.T) {
-			mgoUrl, err := url.Parse("mongodb://localhost:27017")
-			if err != nil {
-				log.Fatal(err)
-			}
-
-			storeConfig := mongo.MongoStoreConfig{
-				MongoURL: mgoUrl,
-				DbName:   "xm",
-			}
-			ds, err := mongo.NewMongoStore(context.Background(), storeConfig)
-			if err != nil {
-				log.Fatal(err)
-			}
-
-			ah := NewApiHandler(ds)
 			rec := httptest.NewRecorder()
 			req, err := http.NewRequest(
 				tc.method,
@@ -419,21 +440,6 @@ func TestGetCompany(t *testing.T) {
 	for _, tc := range tt {
 
 		t.Run(tc.name, func(t *testing.T) {
-			mgoUrl, err := url.Parse("mongodb://localhost:27017")
-			if err != nil {
-				log.Fatal(err)
-			}
-
-			storeConfig := mongo.MongoStoreConfig{
-				MongoURL: mgoUrl,
-				DbName:   "xm",
-			}
-			ds, err := mongo.NewMongoStore(context.Background(), storeConfig)
-			if err != nil {
-				log.Fatal(err)
-			}
-
-			ah := NewApiHandler(ds)
 			rec := httptest.NewRecorder()
 			req, err := http.NewRequest(
 				tc.method,
@@ -468,9 +474,11 @@ func TestGetCompany(t *testing.T) {
 				t.Logf("error message: %s\n", b)
 				t.Errorf("expected status %v, received status %v", tc.statusCode, rec.Code)
 			}
+
 			if err := ds.DropDatabase(context.Background()); err != nil {
 				t.Fatalf("database clean-up failed: %s\n", err)
 			}
+
 		})
 	}
 }
@@ -536,21 +544,6 @@ func TestUpdateCompany(t *testing.T) {
 	for _, tc := range tt {
 
 		t.Run(tc.name, func(t *testing.T) {
-			mgoUrl, err := url.Parse("mongodb://localhost:27017")
-			if err != nil {
-				log.Fatal(err)
-			}
-
-			storeConfig := mongo.MongoStoreConfig{
-				MongoURL: mgoUrl,
-				DbName:   "xm",
-			}
-			ds, err := mongo.NewMongoStore(context.Background(), storeConfig)
-			if err != nil {
-				log.Fatal(err)
-			}
-
-			ah := NewApiHandler(ds)
 			rec := httptest.NewRecorder()
 			compJson, _ := json.Marshal(&tc.want)
 			req, err := http.NewRequest(
@@ -609,6 +602,7 @@ func TestUpdateCompany(t *testing.T) {
 				}
 
 			}
+
 			if err := ds.DropDatabase(context.Background()); err != nil {
 				t.Fatalf("database clean-up failed: %s\n", err)
 			}
@@ -662,21 +656,6 @@ func TestDeleteCompany(t *testing.T) {
 	for _, tc := range tt {
 
 		t.Run(tc.name, func(t *testing.T) {
-			mgoUrl, err := url.Parse("mongodb://localhost:27017")
-			if err != nil {
-				log.Fatal(err)
-			}
-
-			storeConfig := mongo.MongoStoreConfig{
-				MongoURL: mgoUrl,
-				DbName:   "xm",
-			}
-			ds, err := mongo.NewMongoStore(context.Background(), storeConfig)
-			if err != nil {
-				log.Fatal(err)
-			}
-
-			ah := NewApiHandler(ds)
 			rec := httptest.NewRecorder()
 			req, err := http.NewRequest(
 				tc.method,
@@ -729,9 +708,11 @@ func TestDeleteCompany(t *testing.T) {
 					t.Errorf("failed to delete the company")
 				}
 			}
+
 			if err := ds.DropDatabase(context.Background()); err != nil {
 				t.Fatalf("database clean-up failed: %s\n", err)
 			}
+
 		})
 	}
 }
