@@ -5,5 +5,5 @@ a simple Company usecase
    a. to launch mongodb container run docker compose up -d 
 2. run the main server (xm company)
    a. go build
-   b. ./m
+   b. ./xm
 
