@@ -8,5 +8,6 @@ The server listens on :8080
    a. go mod tidy
    b. go build
    b. ./xm
-3. test
+3. test 
+   IMP: to run integration test (currently supported), the mongoDB container must be running
    a. go test ./...
