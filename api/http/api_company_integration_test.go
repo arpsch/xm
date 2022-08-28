@@ -176,18 +176,29 @@ func TestCreateCompany(t *testing.T) {
 func TestGetCompanies(t *testing.T) {
 
 	tt := []struct {
-		name       string
-		method     string
-		URL        string
-		want       []model.Company
-		statusCode int
-		err        error
-		OriginIP   string
+		name        string
+		method      string
+		URL         string
+		preExisting []model.Company
+		want        []model.Company
+		statusCode  int
+		err         error
+		OriginIP    string
 	}{
 		{
 			name:   "with 1 company information",
 			method: http.MethodGet,
 			URL:    "/api/v1/companies",
+			preExisting: []model.Company{
+				{
+					ID:      "1234566",
+					Name:    "Airtel",
+					Country: "Cyprus",
+					Code:    "CY",
+					Website: "airtel.cy",
+					Phone:   "+35722111111",
+				},
+			},
 			want: []model.Company{
 				{
 					ID:      "1234566",
@@ -204,12 +215,95 @@ func TestGetCompanies(t *testing.T) {
 			statusCode: http.StatusOK,
 		},
 		{
-			name:       "with no companies information",
-			method:     http.MethodGet,
-			URL:        "/api/v1/companies",
-			want:       []model.Company{},
-			err:        nil,
-			OriginIP:   "127.0.0.1:8080",
+			name:        "with no companies information",
+			method:      http.MethodGet,
+			URL:         "/api/v1/companies",
+			preExisting: []model.Company{},
+			want:        []model.Company{},
+			err:         nil,
+			OriginIP:    "127.0.0.1:8080",
+			statusCode:  http.StatusOK,
+		},
+		{
+			name:   "filter company information by name",
+			method: http.MethodGet,
+			URL:    "/api/v1/companies?name=vodafone",
+			preExisting: []model.Company{
+				{
+					ID:      "1234566",
+					Name:    "Airtel",
+					Country: "Cyprus",
+					Code:    "CY",
+					Website: "airtel.cy",
+					Phone:   "+35722111111",
+				},
+				{
+					ID:      "1234577",
+					Name:    "vodafone",
+					Country: "Cyprus",
+					Code:    "CY",
+					Website: "vodafone.cy",
+					Phone:   "+35722111199",
+				},
+			},
+			want: []model.Company{
+				{
+					ID:      "1234577",
+					Name:    "vodafone",
+					Country: "Cyprus",
+					Code:    "CY",
+					Website: "vodafone.cy",
+					Phone:   "+35722111199",
+				},
+			},
+			err:      nil,
+			OriginIP: "185.193.151.255:8080",
+
+			statusCode: http.StatusOK,
+		},
+		{
+			name:   "filter company information by country code",
+			method: http.MethodGet,
+			URL:    "/api/v1/companies?code=CY",
+			preExisting: []model.Company{
+				{
+					ID:      "1234566",
+					Name:    "Airtel",
+					Country: "Cyprus",
+					Code:    "CY",
+					Website: "airtel.cy",
+					Phone:   "+35722111111",
+				},
+				{
+					ID:      "1234577",
+					Name:    "vodafone",
+					Country: "Cyprus",
+					Code:    "CY",
+					Website: "vodafone.cy",
+					Phone:   "+35722111199",
+				},
+			},
+			want: []model.Company{
+				{
+					ID:      "1234566",
+					Name:    "Airtel",
+					Country: "Cyprus",
+					Code:    "CY",
+					Website: "airtel.cy",
+					Phone:   "+35722111111",
+				},
+				{
+					ID:      "1234577",
+					Name:    "vodafone",
+					Country: "Cyprus",
+					Code:    "CY",
+					Website: "vodafone.cy",
+					Phone:   "+35722111199",
+				},
+			},
+			err:      nil,
+			OriginIP: "185.193.151.255:8080",
+
 			statusCode: http.StatusOK,
 		},
 	}
@@ -242,9 +336,9 @@ func TestGetCompanies(t *testing.T) {
 				t.Fatalf("Could not create a get request %v", err)
 			}
 
-			if tc.name == "with 1 company information" {
-				// this is to add the same document befor the test
-				compJson, _ := json.Marshal(&tc.want[0])
+			// this is to add the same document befor the test
+			for _, comp := range tc.preExisting {
+				compJson, _ := json.Marshal(&comp)
 				recPrep := httptest.NewRecorder()
 				reqPrep, err := http.NewRequest(
 					http.MethodPost,
