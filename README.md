@@ -3,7 +3,7 @@ a simple Company usecase.
 The server listens on :8080
 
 1. MongoDb is run in a container
-   a. to launch mongodb container run docker compose up -d 
+   a. to launch mongodb container run docker-compose up -d 
 2. run the main server (xm company)
    a. go mod tidy
    b. go build
