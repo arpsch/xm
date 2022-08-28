@@ -141,6 +141,9 @@ func validateClientOriginCountry(r *http.Request) (bool, error) {
 	return true, nil
 }
 
+// CreateCompanyHandler allows to create a company entry in the DB if the client
+// is making request from Cyprus location.
+// Return the entry with ID param added
 func (ah *ApiHandler) CreateCompanyHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
@@ -180,6 +183,9 @@ func (ah *ApiHandler) CreateCompanyHandler(w http.ResponseWriter, r *http.Reques
 	w.Write(cJ)
 }
 
+// ListCompaniesHandler fetches the all companies in the db.
+// Entries could be fetched based on the filters if set
+// Returns array of companies
 func (ah *ApiHandler) ListCompaniesHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
@@ -221,6 +227,8 @@ func (ah *ApiHandler) ListCompaniesHandler(w http.ResponseWriter, r *http.Reques
 	w.Write(cJ)
 }
 
+// GetCompanyHandler fetches a particular company information based on
+// supplied company id
 func (ah *ApiHandler) GetCompanyHandler(w http.ResponseWriter, r *http.Request) {
 
 	ctx := r.Context()
@@ -253,6 +261,7 @@ func (ah *ApiHandler) GetCompanyHandler(w http.ResponseWriter, r *http.Request) 
 	w.Write(cJ)
 }
 
+// UpdateCompanyHandler updates the allowed fields for a selected company by its id
 func (ah *ApiHandler) UpdateCompanyHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
@@ -283,6 +292,8 @@ func (ah *ApiHandler) UpdateCompanyHandler(w http.ResponseWriter, r *http.Reques
 	w.WriteHeader(http.StatusAccepted)
 }
 
+// DeleteCompanyHandler deletes a company information by the given id.
+// But the caller must be calling from Cyprus to delete a company information
 func (ah *ApiHandler) DeleteCompanyHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
