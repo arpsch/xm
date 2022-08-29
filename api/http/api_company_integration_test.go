@@ -44,10 +44,12 @@ func testSetup() error {
 }
 
 func testTeardown() error {
-	err := ds.DropDatabase(context.Background())
+	ctx := context.Background()
+	err := ds.DropDatabase(ctx)
 	if err != nil {
 		return err
 	}
+	ds.Close(ctx)
 	return nil
 }
 
