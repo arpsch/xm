@@ -65,29 +65,30 @@ func TestMongoGetCompanies(t *testing.T) {
 	}
 
 	for name, tc := range testCases {
-		t.Logf("test case: %s", name)
-		ctx := context.Background()
+		t.Run(name, func(t *testing.T) {
+			ctx := context.Background()
 
-		for _, d := range inputCompanies {
-			c := ds.Database(ctx).Collection(DbCompaniesColl)
-			_, err := c.InsertOne(ctx, d)
-			assert.NoError(t, err, "failed to setup input data")
-		}
+			for _, d := range inputCompanies {
+				c := ds.Database(ctx).Collection(DbCompaniesColl)
+				_, err := c.InsertOne(ctx, d)
+				assert.NoError(t, err, "failed to setup input data")
+			}
 
-		//test
-		companies, totalCount, err := ds.ListCompanies(ctx,
-			store.ListQuery{
-				Skip:    tc.skip,
-				Limit:   tc.limit,
-				Filters: tc.filters,
-				Sort:    tc.sort})
-		assert.NoError(t, err, "failed to get companies")
+			//test
+			companies, totalCount, err := ds.ListCompanies(ctx,
+				store.ListQuery{
+					Skip:    tc.skip,
+					Limit:   tc.limit,
+					Filters: tc.filters,
+					Sort:    tc.sort})
+			assert.NoError(t, err, "failed to get companies")
 
-		assert.Equal(t, len(tc.expected), len(companies))
-		assert.Equal(t, tc.compTotal, totalCount)
+			assert.Equal(t, len(tc.expected), len(companies))
+			assert.Equal(t, tc.compTotal, totalCount)
 
-		err = ds.DropDatabase(ctx)
-		assert.NoError(t, err, "failed to clean companies db")
+			err = ds.DropDatabase(ctx)
+			assert.NoError(t, err, "failed to clean companies db")
+		})
 	}
 }
 
@@ -131,23 +132,24 @@ func TestMongoGetCompany(t *testing.T) {
 	}
 
 	for name := range testCases {
-		t.Logf("test case: %s", name)
-		ctx := context.Background()
+		t.Run(name, func(t *testing.T) {
+			ctx := context.Background()
 
-		for _, d := range inputCompanies {
-			c := ds.Database(ctx).Collection(DbCompaniesColl)
-			_, err := c.InsertOne(ctx, d)
-			assert.NoError(t, err, "failed to setup input data")
-		}
+			for _, d := range inputCompanies {
+				c := ds.Database(ctx).Collection(DbCompaniesColl)
+				_, err := c.InsertOne(ctx, d)
+				assert.NoError(t, err, "failed to setup input data")
+			}
 
-		//test
-		company, err := ds.GetCompany(ctx, inputCompanies[1].ID)
-		assert.NoError(t, err, "failed to get company")
+			//test
+			company, err := ds.GetCompany(ctx, inputCompanies[1].ID)
+			assert.NoError(t, err, "failed to get company")
 
-		assert.Equal(t, company.ID, inputCompanies[1].ID)
+			assert.Equal(t, company.ID, inputCompanies[1].ID)
 
-		err = ds.DropDatabase(ctx)
-		assert.NoError(t, err, "failed to clean companies db")
+			err = ds.DropDatabase(ctx)
+			assert.NoError(t, err, "failed to clean companies db")
+		})
 	}
 }
 
@@ -191,29 +193,30 @@ func TestMongoCreateCompany(t *testing.T) {
 	}
 
 	for name, tc := range testCases {
-		t.Logf("test case: %s", name)
-		ctx := context.Background()
+		t.Run(name, func(t *testing.T) {
+			ctx := context.Background()
 
-		for _, d := range inputCompanies {
-			c := ds.Database(ctx).Collection(DbCompaniesColl)
-			_, err := c.InsertOne(ctx, d)
-			assert.NoError(t, err, "failed to setup input data")
-		}
+			for _, d := range inputCompanies {
+				c := ds.Database(ctx).Collection(DbCompaniesColl)
+				_, err := c.InsertOne(ctx, d)
+				assert.NoError(t, err, "failed to setup input data")
+			}
 
-		//test
-		companies, totalCount, err := ds.ListCompanies(ctx,
-			store.ListQuery{
-				Skip:    tc.skip,
-				Limit:   tc.limit,
-				Filters: tc.filters,
-				Sort:    tc.sort})
-		assert.NoError(t, err, "failed to get companies")
+			//test
+			companies, totalCount, err := ds.ListCompanies(ctx,
+				store.ListQuery{
+					Skip:    tc.skip,
+					Limit:   tc.limit,
+					Filters: tc.filters,
+					Sort:    tc.sort})
+			assert.NoError(t, err, "failed to get companies")
 
-		assert.Equal(t, len(tc.expected), len(companies))
-		assert.Equal(t, tc.compTotal, totalCount)
+			assert.Equal(t, len(tc.expected), len(companies))
+			assert.Equal(t, tc.compTotal, totalCount)
 
-		err = ds.DropDatabase(ctx)
-		assert.NoError(t, err, "failed to clean companies db")
+			err = ds.DropDatabase(ctx)
+			assert.NoError(t, err, "failed to clean companies db")
+		})
 	}
 }
 
@@ -269,27 +272,28 @@ func TestMongoUpdateCompany(t *testing.T) {
 	}
 
 	for name, tc := range testCases {
-		t.Logf("test case: %s", name)
-		ctx := context.Background()
+		t.Run(name, func(t *testing.T) {
+			ctx := context.Background()
 
-		for _, d := range inputCompanies {
-			c := ds.Database(ctx).Collection(DbCompaniesColl)
-			_, err := c.InsertOne(ctx, d)
-			assert.NoError(t, err, "failed to setup input data")
-		}
+			for _, d := range inputCompanies {
+				c := ds.Database(ctx).Collection(DbCompaniesColl)
+				_, err := c.InsertOne(ctx, d)
+				assert.NoError(t, err, "failed to setup input data")
+			}
 
-		//test
-		err := ds.UpdateCompany(ctx, tc.expected.ID, tc.input)
-		assert.NoError(t, err, "failed to update company")
+			//test
+			err := ds.UpdateCompany(ctx, tc.expected.ID, tc.input)
+			assert.NoError(t, err, "failed to update company")
 
-		comp, err := ds.GetCompany(ctx, tc.expected.ID)
-		assert.NoError(t, err, "failed to get company")
+			comp, err := ds.GetCompany(ctx, tc.expected.ID)
+			assert.NoError(t, err, "failed to get company")
 
-		assert.Equal(t, tc.expected.Website, comp.Website)
-		assert.Equal(t, tc.expected.Phone, comp.Phone)
+			assert.Equal(t, tc.expected.Website, comp.Website)
+			assert.Equal(t, tc.expected.Phone, comp.Phone)
 
-		err = ds.DropDatabase(ctx)
-		assert.NoError(t, err, "failed to clean companies db")
+			err = ds.DropDatabase(ctx)
+			assert.NoError(t, err, "failed to clean companies db")
+		})
 	}
 }
 
@@ -336,23 +340,25 @@ func TestMongoDeleteCompany(t *testing.T) {
 	}
 
 	for name, tc := range testCases {
-		t.Logf("test case: %s", name)
-		ctx := context.Background()
+		t.Run(name, func(t *testing.T) {
+			ctx := context.Background()
 
-		for _, d := range inputCompanies {
-			c := ds.Database(ctx).Collection(DbCompaniesColl)
-			_, err := c.InsertOne(ctx, d)
-			assert.NoError(t, err, "failed to setup input data")
-		}
+			for _, d := range inputCompanies {
+				c := ds.Database(ctx).Collection(DbCompaniesColl)
+				_, err := c.InsertOne(ctx, d)
+				assert.NoError(t, err, "failed to setup input data")
+			}
 
-		//test
-		err := ds.DeleteCompany(ctx, tc.input)
-		assert.NoError(t, err, "failed to delete company")
+			//test
+			err := ds.DeleteCompany(ctx, tc.input)
+			assert.NoError(t, err, "failed to delete company")
 
-		err = ds.DeleteCompany(ctx, tc.input)
-		assert.Error(t, err, store.ErrCompanyNotFound)
+			err = ds.DeleteCompany(ctx, tc.input)
+			assert.Error(t, err, store.ErrCompanyNotFound)
 
-		err = ds.DropDatabase(ctx)
-		assert.NoError(t, err, "failed to clean companies db")
+			err = ds.DropDatabase(ctx)
+			assert.NoError(t, err, "failed to clean companies db")
+
+		})
 	}
 }
