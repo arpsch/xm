@@ -30,6 +30,10 @@ func testSetup() error {
 		return err
 	}
 
+	if err := ds.Ping(context.Background()); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -45,6 +49,7 @@ func testTeardown() error {
 
 func TestMain(m *testing.M) {
 	if err := testSetup(); err != nil {
+		log.Fatalf("severe setup issue :%v", err)
 		os.Exit(-1)
 	}
 
